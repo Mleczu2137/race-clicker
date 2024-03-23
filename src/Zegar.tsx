@@ -7,9 +7,7 @@ export function Zegar({
 }) {
   return (
     <div className="zegar">
-      <div
-        style={{ transform: `rotate(${speed / maxSpeed}turn)` }}
-      ></div>
+      <div style={{ transform: `rotate(${speed / maxSpeed}turn)` }}></div>
     </div>
   );
 }
