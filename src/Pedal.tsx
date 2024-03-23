@@ -1,19 +1,20 @@
 import { useState } from "react";
+import PedalImg from "./assets/pedal.webp";
 
-export function Button({ onClick }: { onClick: () => void }) {
+export function Pedal({ onClick }: { onClick: () => void }) {
   const [clicks, setClicks] = useState(0);
 
   return (
-    <>
+    <div>
       <p>Clicks: {clicks}</p>
-      <button
+      <img
+        id="pedal"
         onClick={() => {
           setClicks(clicks + 1);
           onClick();
         }}
-      >
-        SPEEDUJ
-      </button>
-    </>
+        src={PedalImg}
+      />
+    </div>
   );
 }

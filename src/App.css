@@ -31,10 +31,30 @@
 }
 
 .zegar > div {
-  width: 1px;
+  width: 2px;
   height: 50%;
   transform-origin: top center;
   background: red;
+
+  transition: transform 0.2s;
+}
+
+#pedal {
+  height: 300px;
+  aspect-ratio: 321/838;
+}
+
+#pedal:active {
+  transform: rotateX(20deg);
+  transform-origin: bottom;
+}
+
+#panel {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  align-items: end;
+  justify-content: center;
 }
 
 main {
