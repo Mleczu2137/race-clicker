@@ -15,6 +15,8 @@ export function calculate(cars: Car[]) {
     car.acceleration /= MASS;
     const drag = (car.speed ** 2 * DRAG_COEFFICIENT) / MASS;
     car.acceleration -= drag;
+    // gravity
+    car.acceleration -= 0.05 / TICK_RATE;
     car.speed = Math.max(0, car.speed + car.acceleration);
     car.position += car.speed;
 
