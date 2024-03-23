@@ -5,16 +5,14 @@ export function Pedal({ onClick }: { onClick: () => void }) {
   const [clicks, setClicks] = useState(0);
 
   return (
-    <div>
+    <div
+      onClick={() => {
+        setClicks(clicks + 1);
+        onClick();
+      }}
+    >
       <p>Clicks: {clicks}</p>
-      <img
-        id="pedal"
-        onClick={() => {
-          setClicks(clicks + 1);
-          onClick();
-        }}
-        src={PedalImg}
-      />
+      <img id="pedal" src={PedalImg} />
     </div>
   );
 }

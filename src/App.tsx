@@ -22,12 +22,6 @@ function App() {
 
   return (
     <main>
-      <div className="upgrades">
-        <UpgradeButton name="Drag" />
-        <UpgradeButton name="Speed" />
-        <UpgradeButton name="Mass" />
-      </div>
-
       {cars.map((car, index) => {
         return (
           <div
@@ -40,8 +34,13 @@ function App() {
           ></div>
         );
       })}
-
       <div id="panel">
+        <div className="upgrades">
+          <UpgradeButton name="Aerodynamika" />
+          <UpgradeButton name="Prędkość" />
+          <UpgradeButton name="Waga" />
+          <UpgradeButton name="Tempomat" />
+        </div>
         <Zegar speed={cars[0].speed} maxSpeed={1} />
         <Pedal
           onClick={() => {
