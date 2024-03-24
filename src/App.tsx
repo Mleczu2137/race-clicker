@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { calculate, Car } from "./util";
+import { calculate, Car, TRACK_LENGTH } from "./util";
 import "./App.css";
 import { Pedal } from "./Pedal";
 import { UpgradeButton } from "./UpgradeButton";
@@ -14,7 +14,7 @@ function App() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCars((cars) => calculate(cars));
+      setCars(calculate);
     }, 1000 / 64);
 
     return () => clearInterval(interval);
@@ -22,18 +22,19 @@ function App() {
 
   return (
     <main>
-      {cars.map((car, index) => {
-        return (
+      <div id="track">
+        {cars.map((car, index) => (
           <div
             key={index}
             style={{
-              height: "100px",
-              width: `${car.position / 10}%`,
-              background: "red",
+              transform: `translateX(${
+                (car.position / TRACK_LENGTH) * window.innerWidth
+              }px)`,
             }}
           ></div>
-        );
-      })}
+        ))}
+      </div>
+
       <div id="panel">
         <div className="upgrades">
           <UpgradeButton name="Aerodynamika" />

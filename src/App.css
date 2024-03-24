@@ -64,6 +64,24 @@ main {
   justify-content: center;
 }
 
+#track {
+  overflow-x: hidden;
+  height: 200px;
+}
+
+#track > div {
+  height: 50%;
+  aspect-ratio: 1;
+}
+
+#track > div:nth-child(1) {
+  background: red;
+}
+
+#track > div:nth-child(2) {
+  background: green;
+}
+
 main {
   height: 100%;
   width: 100%;

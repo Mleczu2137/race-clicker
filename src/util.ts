@@ -5,7 +5,7 @@ export type Car = {
   lap: number;
 };
 
-const TRACK_LENGTH = 1000; //meters
+export const TRACK_LENGTH = 1000; //meters
 const TICK_RATE = 64;
 const DRAG_COEFFICIENT = 0.1;
 const MASS = 1;
