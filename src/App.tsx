@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { TRACK_LENGTH } from "./util";
 import "./App.css";
 import { Pedal } from "./Pedal";
@@ -5,7 +6,18 @@ import { UpgradeButton } from "./UpgradeButton";
 import { Zegar } from "./Zegar";
 import { useWebsocket } from "./use-websocket";
 
-//https://cdn.pixabay.com/photo/2019/10/01/22/23/pedals-4519485_1280.png
+
+function MoneyDisplay() {
+  const [money, setMoney] = useState(0);
+
+  return <div className="money">Money: ${money}</div>; 
+}
+
+function FansDisplay() {
+  const [fans, setFans] = useState(0);
+
+  return <div className="fans">Fans: {fans}</div>; 
+}
 
 function App() {
   const { cars, click } = useWebsocket();
@@ -27,17 +39,19 @@ function App() {
 
       <div id="panel">
         <div className="upgrades">
-          <UpgradeButton name="Aerodynamika" />
+          <UpgradeButton name="Aerodynamika" image="assets/aerodynamika.png"/>
           <UpgradeButton name="Prędkość" />
           <UpgradeButton name="Waga" />
           <UpgradeButton name="Tempomat" />
         </div>
-        <Zegar speed={0} maxSpeed={1} />
+        <Zegar speed={cars[0].speed} maxSpeed={5} />
         <Pedal
           onClick={() => {
             click()
           }}
         />
+        <MoneyDisplay />
+        <FansDisplay />
       </div>
     </main>
   );

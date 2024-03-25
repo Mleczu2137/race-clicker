@@ -3,7 +3,11 @@
   height: 100vh;
   width: 100vw;
 }
-
+body{
+  background-image: url(./assets/zajebista_trawka-transformed.jpeg);
+  background-repeat: no-repeat;
+  background-size: 125%;
+}
 main {
   height: 100%;
   display: flex;
@@ -20,6 +24,53 @@ main {
 .button > p {
   margin: 0;
 }
+.button#Tempomat {
+  background-color: aqua;
+}
+
+.button#Waga {
+  background-color: aqua;
+}
+
+.button#Prędkość {
+  background-color: aqua;
+}
+
+.button#Aerodynamika {
+  background-color: aqua;
+}
+
+.money {
+  background-color: #4CAF50; 
+  border: 3px solid grey;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  margin-right: 5%;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 10px 24px;
+  transition-duration: 0.4s;
+}
+
+.fans {
+  background-color: #4CAF50; 
+  border: 3px solid grey;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  margin-right: 5%;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 10px 24px;
+  transition-duration: 0.4s;
+}
 
 .upgrades {
   display: grid;
@@ -32,9 +83,12 @@ main {
   justify-content: center;
   align-items: end;
   background-color: #1a1a1a;
+  background-image: url(./assets/tempomat.png);
+  background-repeat: no-repeat;
   border-radius: 9999px;
   width: 256px;
   height: 256px;
+  
 }
 
 .zegar > div {
@@ -42,6 +96,7 @@ main {
   height: 50%;
   transform-origin: top center;
   background: red;
+  rotate: 70deg;
 
   transition: transform 0.2s;
 }
