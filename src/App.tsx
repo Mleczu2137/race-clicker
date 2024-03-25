@@ -16,6 +16,17 @@ function MoneyDisplay() {
   return <div className="money">Money: ${money}</div>; 
 }
 
+function FansDisplay() {
+  const [fans, setFans] = useState(0);
+  
+
+  useEffect(() => {
+    return () => {};
+  }, []);
+
+  return <div className="fans">Fans: {fans}</div>; 
+}
+
 function App() {
   const [cars, setCars] = useState<Car[]>([
     { position: 0, lap: 0, speed: 0, acceleration: 0 },
@@ -51,7 +62,7 @@ function App() {
           <UpgradeButton name="Waga" />
           <UpgradeButton name="Tempomat" />
         </div>
-        <Zegar speed={cars[0].speed} maxSpeed={1} />
+        <Zegar speed={cars[0].speed} maxSpeed={5} />
         <Pedal
           onClick={() => {
             const car = cars[0];
@@ -60,6 +71,7 @@ function App() {
           }}
         />
         <MoneyDisplay />
+        <FansDisplay />
       </div>
     </main>
   );
