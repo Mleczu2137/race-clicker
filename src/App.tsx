@@ -1,11 +1,20 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { calculate, Car, TRACK_LENGTH } from "./util";
 import "./App.css";
 import { Pedal } from "./Pedal";
 import { UpgradeButton } from "./UpgradeButton";
 import { Zegar } from "./Zegar";
 
-//https://cdn.pixabay.com/photo/2019/10/01/22/23/pedals-4519485_1280.png
+function MoneyDisplay() {
+  const [money, setMoney] = useState(0);
+  
+
+  useEffect(() => {
+    return () => {};
+  }, []);
+
+  return <div className="money">Money: ${money}</div>; 
+}
 
 function App() {
   const [cars, setCars] = useState<Car[]>([
@@ -50,6 +59,7 @@ function App() {
             setCars(cars);
           }}
         />
+        <MoneyDisplay />
       </div>
     </main>
   );
