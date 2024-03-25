@@ -7,22 +7,12 @@ import { Zegar } from "./Zegar";
 
 function MoneyDisplay() {
   const [money, setMoney] = useState(0);
-  
-
-  useEffect(() => {
-    return () => {};
-  }, []);
 
   return <div className="money">Money: ${money}</div>; 
 }
 
 function FansDisplay() {
   const [fans, setFans] = useState(0);
-  
-
-  useEffect(() => {
-    return () => {};
-  }, []);
 
   return <div className="fans">Fans: {fans}</div>; 
 }
@@ -57,7 +47,7 @@ function App() {
 
       <div id="panel">
         <div className="upgrades">
-          <UpgradeButton name="Aerodynamika" />
+          <UpgradeButton name="Aerodynamika" image="assets/aerodynamika.png"/>
           <UpgradeButton name="Prędkość" />
           <UpgradeButton name="Waga" />
           <UpgradeButton name="Tempomat" />
