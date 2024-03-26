@@ -20,6 +20,7 @@ type Handshake = {
 export function useWebsocket() {
   const [cars, setCars] = useState<Car[]>([]);
   const [user, setUser] = useState<User | null>(null);
+  const [clicks, setClicks] = useState(0);
   const conn = useRef<WebSocket | null>(null);
 
   useEffect(() => {
@@ -29,25 +30,22 @@ export function useWebsocket() {
 
     websocket.onmessage = (event) => {
       if (!isReady) {
-        console.log("handshake");
         const handshake: Handshake = JSON.parse(event.data);
         setUser(handshake.user);
         setCars(handshake.cars);
         isReady = true;
-        console.log(handshake);
         return;
       }
 
       const newCars = JSON.parse(event.data);
-      setCars((prevCars) => {
-        return prevCars.map((car, index) => newCars[index] ?? car);
-      });
+      setCars((prevCars) =>
+        prevCars.map((car, index) => newCars[index] ?? car)
+      );
     };
 
     return () => {
       websocket.close();
       conn.current = null;
-      isReady = false;
     };
   }, [setCars]);
 
@@ -61,7 +59,8 @@ export function useWebsocket() {
 
   function click() {
     conn.current?.send("click");
+    setClicks((prev) => prev + 1);
   }
 
-  return { user, cars, click };
+  return { user, cars, click, clicks };
 }

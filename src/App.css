@@ -3,13 +3,18 @@
   height: 100vh;
   width: 100vw;
 }
+* {
+  box-sizing: border-box;
+}
 body{
   background-image: url(./assets/zajebista_trawka-transformed.jpeg);
   background-repeat: no-repeat;
   background-size: 125%;
+  margin: 0;
 }
 main {
   height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -40,38 +45,6 @@ main {
   background-color: aqua;
 }
 
-.money {
-  background-color: #4CAF50; 
-  border: 3px solid grey;
-  color: white;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  margin-right: 5%;
-  cursor: pointer;
-  border-radius: 8px;
-  padding: 10px 24px;
-  transition-duration: 0.4s;
-}
-
-.fans {
-  background-color: #4CAF50; 
-  border: 3px solid grey;
-  color: white;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  margin-right: 5%;
-  cursor: pointer;
-  border-radius: 8px;
-  padding: 10px 24px;
-  transition-duration: 0.4s;
-}
-
 .upgrades {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -88,7 +61,6 @@ main {
   border-radius: 9999px;
   width: 256px;
   height: 256px;
-  
 }
 
 .zegar > div {
@@ -117,6 +89,7 @@ main {
   gap: 32px;
   align-items: end;
   justify-content: center;
+  padding-bottom: 12px;
 }
 
 #track {
@@ -137,7 +110,22 @@ main {
   background: green;
 }
 
-main {
-  height: 100%;
-  width: 100%;
+.stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 128px;
+}
+
+.stats > div {
+  background-color: #4CAF50; 
+  border: 3px solid grey;
+  color: white;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 10px 24px;
+  white-space: nowrap;
 }

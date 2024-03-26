@@ -1,12 +1,15 @@
-type ClientData = { id: number };
+type ClientData = { id: number; car: Car };
 type Car = {
+  username?: string;
+  clicks?: number;
+  tempo?: number;
+
   speed: number;
   acceleration: number;
   position: number;
   lap: number;
 };
 
-const MAX_PLAYERS = 2;
 let cars: Car[] = [];
 
 const server = Bun.serve<ClientData>({
@@ -16,24 +19,23 @@ const server = Bun.serve<ClientData>({
       return new Response("Server is full", { status: 400 });
     }
 
-    server.upgrade(req, { data: { id: cars.length } });
+    server.upgrade(req, {
+      data: {
+        id: cars.length,
+        car: { speed: 0, acceleration: 0, position: 0, lap: 0 },
+      },
+    });
   },
   websocket: {
     open(ws) {
       console.log(`Player ${ws.data.id} connected to server`);
-      cars.push({ speed: 0, acceleration: 0, position: 0, lap: 0 });
+      cars.push(ws.data.car);
 
       ws.send(JSON.stringify({ user: ws.data, cars: cars }));
       ws.subscribe("cars");
     },
     message(ws, message) {
-      const car = cars[ws.data.id];
-      if (!car) {
-        ws.close();
-        return;
-      }
-
-      car.acceleration += 5;
+      ws.data.car.acceleration += 5;
     },
     close(ws) {
       console.log(`Player ${ws.data.id} disconnected from the server`);
@@ -42,9 +44,11 @@ const server = Bun.serve<ClientData>({
   },
 });
 
+const MAX_PLAYERS = 2;
 const TRACK_LENGTH = 1000; //meters
 const TICK_RATE = 64;
 const DRAG_COEFFICIENT = 0.1;
+const GRAVITY = 0.05;
 const MASS = 1;
 
 function calculate(cars: Car[]) {
@@ -53,7 +57,7 @@ function calculate(cars: Car[]) {
     const drag = (car.speed ** 2 * DRAG_COEFFICIENT) / MASS;
     car.acceleration -= drag;
     // gravity
-    car.acceleration -= 0.05 / TICK_RATE;
+    car.acceleration -= GRAVITY / TICK_RATE;
     car.speed = Math.max(0, car.speed + car.acceleration);
     car.position += car.speed;
 
