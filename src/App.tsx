@@ -19,7 +19,11 @@ function FansDisplay() {
 }
 
 function App() {
-  const { cars, click, clicks } = useWebsocket();
+  const { status, cars, click, clicks } = useWebsocket();
+
+  if (status === "connecting") {
+    return <div>Connecting...</div>;
+  }
 
   return (
     <main>
