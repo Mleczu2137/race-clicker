@@ -27,7 +27,7 @@ function App() {
 
   return (
     <main>
-      <div id="track">
+      <div className="track">
         {cars.map((car, index) => (
           <div
             key={index}
@@ -36,11 +36,11 @@ function App() {
                 (car.position / TRACK_LENGTH) * window.innerWidth
               }px)`,
             }}
-          ></div>
+          />
         ))}
       </div>
 
-      <div id="panel">
+      <div className="panel">
         <div className="stats">
           <div>{clicks} clicks</div>
           <MoneyDisplay />

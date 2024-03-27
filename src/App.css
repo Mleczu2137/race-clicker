@@ -24,6 +24,15 @@ main {
   width: 148px;
   aspect-ratio: 1 / 1;
   border-radius: 12px;
+  border: 2px solid darkturquoise;
+
+  transition: all 0.1s;
+  box-shadow: 0 4px 0px 0px rgb(0 0 0 / 0.5);
+}
+
+.button:active {
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  transform: translateY(4px);
 }
 
 .button > p {
@@ -73,17 +82,19 @@ main {
   transition: transform 0.2s;
 }
 
-#pedal {
+.pedal {
   height: 300px;
   aspect-ratio: 321/838;
+  background-image: url(./assets/pedal.webp);
+  background-size: contain;
 }
 
-#pedal:active {
+.pedal:active {
   transform: rotateX(20deg);
   transform-origin: bottom;
 }
 
-#panel {
+.panel {
   display: flex;
   flex-direction: row;
   gap: 32px;
@@ -92,21 +103,21 @@ main {
   padding-bottom: 12px;
 }
 
-#track {
+.track {
   overflow-x: hidden;
   height: 200px;
 }
 
-#track > div {
+.track > div {
   height: 50%;
   aspect-ratio: 1;
 }
 
-#track > div:nth-child(1) {
+.track > div:nth-child(1) {
   background: red;
 }
 
-#track > div:nth-child(2) {
+.track > div:nth-child(2) {
   background: green;
 }
 
