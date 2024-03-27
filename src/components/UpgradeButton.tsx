@@ -2,7 +2,7 @@ export function UpgradeButton({
   name,
   image,
   level = 1,
-  price = 1
+  price = 1,
 }: {
   name: string;
   image?: string;
@@ -10,11 +10,12 @@ export function UpgradeButton({
   price?: number;
 }) {
   return (
-    <button id={name} className="button">
-      <p>{level}</p>
+    <button className={`button ${name}`}>
       <img height={96} width={96} src={image} />
-      <p>{name}</p>
-      <p>CENA: {price}$</p>
+      <p className="name">{name}</p>
+      <p>
+        {level} level - {Math.pow(level, 1.5).toFixed(2)} $
+      </p>
     </button>
   );
 }
