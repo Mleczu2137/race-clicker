@@ -1,8 +1,26 @@
 type ClientData = { id: number; car: Car };
+
+type MessageIn =
+  | { type: "click" }
+  | { type: "upgrade"; name: "aerodynamics" | "velocity" | "mass" | "tempo" };
+
+type MessageOut = Car[];
+
+type Upgrades = {
+  aerodynamics: number;
+  velocity: number;
+  mass: number;
+  tempo: number;
+};
+
 type Car = {
-  username?: string;
-  clicks?: number;
-  tempo?: number;
+  username: string;
+
+  hasUpdated: boolean;
+  clicks: number;
+  money: number;
+
+  upgrades: Upgrades;
 
   speed: number;
   acceleration: number;
@@ -10,39 +28,96 @@ type Car = {
   lap: number;
 };
 
-let cars: Car[] = [];
+class CarManager {
+  private cars: Car[] = [];
+
+  add(car: Car) {
+    this.cars.push(car);
+  }
+
+  remove(username: string) {
+    const index = this.cars.findIndex((car) => car.username === username);
+    delete this.cars[index];
+  }
+
+  get(username: string) {
+    const index = this.cars.findIndex((car) => car.username === username);
+    return this.cars[index];
+  }
+
+  all() {
+    return Array.from(this.cars.values());
+  }
+
+  size() {
+    return this.cars.length;
+  }
+}
+
+const cars = new CarManager();
 
 const server = Bun.serve<ClientData>({
   port: 25555,
   fetch(req, server) {
-    if (cars.length >= MAX_PLAYERS) {
+    if (cars.size() >= MAX_PLAYERS) {
       return new Response("Server is full", { status: 400 });
+    }
+
+    const username = new URL(req.url).searchParams.get("username");
+    if (!username) {
+      return new Response("Username is required", { status: 400 });
     }
 
     server.upgrade(req, {
       data: {
-        id: cars.length,
-        car: { speed: 0, acceleration: 0, position: 0, lap: 0 },
+        id: cars,
+        car: {
+          username,
+          speed: 0,
+          acceleration: 0,
+          position: 0,
+          lap: 0,
+          upgrades: { aerodynamics: 0, velocity: 0, mass: 0, tempo: 0 },
+          clicks: 0,
+          money: 0,
+        },
       },
     });
   },
   websocket: {
     open(ws) {
       console.log(`Player ${ws.data.id} connected to server`);
-      cars.push(ws.data.car);
+      cars.add(ws.data.car);
 
       ws.send(JSON.stringify({ user: ws.data, cars: cars }));
       ws.subscribe("cars");
     },
     message(ws, message) {
-      ws.data.car.acceleration += 5;
+      const data: MessageIn = JSON.parse(message.toString());
+
+      ws.data.car.hasUpdated = true;
+      if (data.type === "click") {
+        ws.data.car.clicks++;
+      } else if (data.type === "upgrade") {
+        const upgrade = data.name;
+
+        const price = getPrice(ws.data.car.upgrades[upgrade]);
+        if (ws.data.car.money >= price) {
+          ws.data.car.money -= price;
+          ws.data.car.upgrades[upgrade]++;
+        }
+      }
     },
     close(ws) {
       console.log(`Player ${ws.data.id} disconnected from the server`);
-      cars = [];
+      cars.remove(ws.data.car.username);
     },
   },
 });
+
+function getPrice(level: number): number {
+  return Math.round(1 * Math.pow(1.15, level) * 100) / 100;
+}
 
 const MAX_PLAYERS = 2;
 const TRACK_LENGTH = 1000; //meters
@@ -53,11 +128,20 @@ const MASS = 1;
 
 function calculate(cars: Car[]) {
   cars.forEach((car) => {
-    car.acceleration /= MASS;
-    const drag = (car.speed ** 2 * DRAG_COEFFICIENT) / MASS;
+    const dragCoefficient =
+      DRAG_COEFFICIENT - car.upgrades.aerodynamics * 0.001;
+    const speedMultiplier = 1 + car.upgrades.velocity;
+    const mass = MASS - car.upgrades.mass * 0.01;
+    const tempo = car.upgrades.tempo * 0.25;
+
+    car.acceleration = tempo + car.clicks * speedMultiplier;
+    car.acceleration /= mass;
+
+    const drag = (car.speed ** 2 * dragCoefficient) / mass;
     car.acceleration -= drag;
     // gravity
     car.acceleration -= GRAVITY / TICK_RATE;
+
     car.speed = Math.max(0, car.speed + car.acceleration);
     car.position += car.speed;
 
@@ -68,15 +152,23 @@ function calculate(cars: Car[]) {
   });
 }
 
-const loop = setInterval(() => {
-  const carsToSend = Object.assign(
-    {},
-    cars.map((car) => (car.acceleration > 0 ? car : undefined))
-  );
+setInterval(() => {
+  const carsToSend = cars.all().filter((car) => car.hasUpdated);
 
-  if (carsToSend[0]) {
-    server.publish("cars", JSON.stringify(carsToSend));
+  if (carsToSend.length > 0) {
+    server.publish(
+      "cars",
+      JSON.stringify(carsToSend, [
+        "username",
+        "upgrades",
+        "speed",
+        "acceleration",
+        "position",
+        "lap",
+      ])
+    );
   }
 
-  calculate(cars);
+  calculate(cars.all());
+  cars.all().forEach((car) => (car.hasUpdated = false));
 }, 1000 / TICK_RATE);
