@@ -3,11 +3,13 @@ export type MessageIn =
   | { type: "upgrade"; name: "aerodynamics" | "velocity" | "mass" | "tempo" };
 
 export type MessageOut =
-  | { type: "update"; cars: Car[] }
+  | { type: "update"; tick: number; cars: Car[] }
+  | { type: "sync"; tick: number }
   | { type: "remove"; username: string };
 
 export type Handshake = {
   user: string;
+  tick: number;
   cars: Car[];
 };
 
@@ -44,20 +46,21 @@ export type CarClient = {
 };
 
 export const TRACK_LENGTH = 1000; //meters
-const TICK_RATE = 64;
+export const TICK_RATE = 64;
 const DRAG_COEFFICIENT = 0.1;
 const GRAVITY = 0.05;
 const MASS = 1;
 
 export function calculate(car: Car): Car {
-  const dragCoefficient = DRAG_COEFFICIENT - car.upgrades.aerodynamics * 0.001;
+  const dragCoefficient = DRAG_COEFFICIENT - car.upgrades.aerodynamics * 0.0001;
   const speedMultiplier = 1 + car.upgrades.velocity;
-  const mass = MASS - car.upgrades.mass * 0.01;
-  const tempo = car.upgrades.tempo * 0.25;
+  const mass = MASS - car.upgrades.mass * 0.001;
+  const tempo = car.upgrades.tempo * 0.1;
 
   car.acceleration = tempo;
   if (car.clicks !== undefined) {
     car.acceleration += car.clicks * speedMultiplier;
+    car.clicks = 0;
   }
   car.acceleration /= mass;
 

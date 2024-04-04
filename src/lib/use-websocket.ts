@@ -1,23 +1,41 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   MessageOut,
   Car,
   Handshake,
   MessageIn,
   calculate,
+  TICK_RATE,
 } from "../../server/shared";
 
 export type { Car };
 
 type ConnectionStatus = "connecting" | "open" | "closed";
 
+type Update = {
+  tick: number;
+  cars: Car[];
+};
+
 export function useWebsocket(username: string) {
   const [cars, setCars] = useState<Car[]>([]);
-
   const [user, setUser] = useState<string | null>(null);
+  const [money, setMoney] = useState(0);
   const [clicks, setClicks] = useState(0);
-  const [status, setStatus] = useState<ConnectionStatus>("connecting");
+
   const conn = useRef<WebSocket | null>(null);
+  const [status, setStatus] = useState<ConnectionStatus>("connecting");
+  const tick = useRef(2);
+  const updates = useRef<Update[]>([]);
+
+  const userCar = useMemo(() => {
+    const index = cars.findIndex((c) => c.username == user);
+    if (index === -1) {
+      return null;
+    }
+    return cars[index];
+  }, [cars, user]);
+
 
   useEffect(() => {
     const websocket = new WebSocket(
@@ -25,10 +43,23 @@ export function useWebsocket(username: string) {
     );
     conn.current = websocket;
 
+    function update(newCars: Car[]) {
+      setCars((prevCars) =>
+        prevCars.map((car) => {
+          const index = newCars.findIndex((c) => c.username === car.username);
+          if (index !== -1) {
+            return newCars[index];
+          }
+          return car;
+        })
+      );
+    }
+
     function handshakeHandler(event: MessageEvent) {
       const handshake: Handshake = JSON.parse(event.data);
       setUser(handshake.user);
       setCars(handshake.cars);
+      tick.current = handshake.tick;
       websocket.onmessage = messageHandler;
     }
 
@@ -36,17 +67,33 @@ export function useWebsocket(username: string) {
       const message: MessageOut = JSON.parse(event.data);
 
       if (message.type === "update") {
-        setCars((prevCars) =>
-          prevCars.map((car) => {
-            const index = message.cars.findIndex(
-              (c) => c.username === car.username
-            );
-            if (index !== -1) {
-              return message.cars[index];
-            }
-            return car;
-          })
-        );
+        if (message.tick > tick.current) {
+          updates.current.push(message);
+        } else {
+          tick.current = message.tick;
+          setCars((prevCars) =>
+            prevCars.map((car) => {
+              const index = message.cars.findIndex(
+                (c) => c.username === car.username
+              );
+              if (index !== -1) {
+                return message.cars[index];
+              }
+              return car;
+            })
+          );
+        }
+      } else if (message.type === "sync") {
+        if (message.tick !== tick.current) {
+          console.log(
+            "dropped",
+            "server",
+            message.tick,
+            "client",
+            tick.current
+          );
+          tick.current = message.tick;
+        }
       } else if (message.type === "remove") {
         setCars((prevCars) =>
           prevCars.filter((car) => car.username !== message.username)
@@ -58,6 +105,8 @@ export function useWebsocket(username: string) {
     websocket.onopen = () => setStatus("open");
     websocket.onclose = () => {
       setCars([]);
+      setUser(null)
+      setClicks(0)
       setStatus("closed");
     };
 
@@ -71,11 +120,28 @@ export function useWebsocket(username: string) {
     if (status !== "open") return;
 
     const interval = setInterval(() => {
-      setCars((prev) => prev.map(calculate));
-    }, 1000 / 64);
+      setCars((prev) => {
+        const update = updates.current[0];
+        if (update && update.tick === tick.current) {
+          updates.current.shift();
+          prev.map((car) => {
+            const index = update.cars.findIndex(
+              (c) => c.username === car.username
+            );
+            if (index !== -1) {
+              return update.cars[index];
+            }
+            return car;
+          });
+        }
+        return prev.map(calculate);
+      });
+
+      tick.current++;
+    }, 1000 / TICK_RATE);
 
     return () => clearInterval(interval);
-  }, [setCars, status]);
+  }, [status]);
 
   function click() {
     conn.current?.send(JSON.stringify({ type: "click" }));
@@ -90,5 +156,5 @@ export function useWebsocket(username: string) {
     conn.current?.send(JSON.stringify(message));
   }
 
-  return { status, user, cars, click, clicks, upgrade };
+  return { status, user, userCar, cars, click, clicks, upgrade };
 }

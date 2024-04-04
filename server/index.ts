@@ -3,6 +3,7 @@ import {
   Handshake,
   MessageIn,
   MessageOut,
+  TICK_RATE,
   calculate,
   getPrice,
 } from "./shared";
@@ -33,7 +34,9 @@ class CarManager {
   }
 }
 
+const MAX_PLAYERS = 2;
 const cars = new CarManager();
+let serverTick = 0;
 
 const server = Bun.serve<Car>({
   port: 25555,
@@ -66,11 +69,16 @@ const server = Bun.serve<Car>({
       console.log(`Player ${ws.data.username} connected to server`);
       cars.add(ws.data);
 
-      const handshake: Handshake = { user: ws.data.username, cars: cars.all() };
+      const handshake: Handshake = {
+        user: ws.data.username,
+        tick: serverTick,
+        cars: cars.all(),
+      };
 
       ws.send(
         JSON.stringify(handshake, [
           "user",
+          "tick",
           "cars",
           "username",
           "upgrades",
@@ -90,14 +98,15 @@ const server = Bun.serve<Car>({
     message(ws, message) {
       const data: MessageIn = JSON.parse(message.toString());
 
-      ws.data.hasUpdated = true;
       if (data.type === "click") {
+        ws.data.hasUpdated = true;
         ws.data.clicks++;
       } else if (data.type === "upgrade") {
         const upgrade = data.name;
-
-        const price = getPrice(ws.data.upgrades[upgrade]);
+        const price = 0; //getPrice(ws.data.upgrades[upgrade]);
         if (ws.data.money >= price) {
+          ws.data.hasUpdated = true;
+
           ws.data.money -= price;
           ws.data.upgrades[upgrade]++;
         }
@@ -115,20 +124,19 @@ const server = Bun.serve<Car>({
   },
 });
 
-const MAX_PLAYERS = 2;
-const TICK_RATE = 64;
-
 setInterval(() => {
   cars.all().forEach((car) => {
     calculate(car);
   });
 
+  const message: MessageOut = { type: "sync", tick: serverTick };
+  server.publish("cars", JSON.stringify(message));
+
   const carsToSend = cars.all().filter((car) => car.hasUpdated);
   if (carsToSend.length > 0) {
-    console.log(carsToSend);
-
     const message: MessageOut = {
       type: "update",
+      tick: serverTick,
       cars: carsToSend,
     };
 
@@ -136,6 +144,7 @@ setInterval(() => {
       "cars",
       JSON.stringify(message, [
         "type",
+        "tick",
         "cars",
         "username",
         "upgrades",
@@ -155,4 +164,6 @@ setInterval(() => {
   cars.all().forEach((car) => {
     car.hasUpdated = false;
   });
+
+  serverTick++;
 }, 1000 / TICK_RATE);
