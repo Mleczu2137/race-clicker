@@ -9,10 +9,10 @@ export function UpgradeButton({
   name: string;
   image?: string;
   level?: number;
-  onClick?: (upgrade: any) => void;
+  onClick?: () => void;
 }) {
   return (
-    <button className={`button ${name}`} onClick={() => onClick?.(name)}>
+    <button className={`button ${name}`} onClick={onClick}>
       <img height={96} width={96} src={image} />
       <p className="name">{name}</p>
       <p>

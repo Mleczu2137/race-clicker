@@ -1,39 +1,27 @@
-import React, { useState } from "react";
 import "./App.css";
 import { Pedal } from "./components/Pedal";
 import { UpgradeButton } from "./components/UpgradeButton";
 import { Zegar } from "./components/Zegar";
 import { useWebsocket } from "./lib/use-websocket";
 import { TRACK_LENGTH } from "../server/shared";
-
-function MoneyDisplay({ money }: { money: number }) {
-  return <div>${money}</div>;
-}
-
-function FansDisplay({ fans }: { fans: number }) {
-  return <div>{fans} fans</div>;
-}
+import AerodynamicImage from "./assets/aerodynamika.svg";
+import VelocityImage from "./assets/predkosc.svg";
+import MassImage from "./assets/waga.svg";
+import TempomatImage from "./assets/tempomat_icon.svg";
 
 function App() {
-  const { status, cars, click, clicks, upgrade } = useWebsocket("hatfu");
-  const [money, setMoney] = useState(0);
+  const { status, userCar, cars, click, clicks, upgrade } =
+    useWebsocket("hatfu");
 
   if (status === "connecting") {
     return <div>Connecting...</div>;
+  } else if (status === "closed") {
+    return <div>Connection closed</div>;
   }
-
-  const addMoneyOnClick = () => {
-    click()
-    setMoney(money + 1);
-  };
 
   return (
     <main>
       <div className="track">
-        <div>
-          {/* Track */}
-        </div>
-        <div></div>
         {cars.map((car, index) => (
           <div
             key={index}
@@ -49,21 +37,37 @@ function App() {
       <div className="panel">
         <div className="stats">
           <div>{clicks} clicks</div>
-          <MoneyDisplay money={money} />
-          <FansDisplay fans={0} />
+          <div>${userCar?.money}</div>
+          <div>{0} fans</div>
         </div>
         <div className="upgrades">
           <UpgradeButton
             name="Aerodynamika"
-            image="assets/aerodynamika.png"
-            onClick={(s) => upgrade(s)}
+            image={AerodynamicImage}
+            level={userCar?.upgrades.aerodynamics}
+            onClick={() => upgrade("aerodynamics")}
           />
-          <UpgradeButton name="Prędkość" onClick={(s) => upgrade(s)} />
-          <UpgradeButton name="Waga" onClick={(s) => upgrade(s)} />
-          <UpgradeButton name="Tempomat" onClick={(s) => upgrade(s)} />
+          <UpgradeButton
+            name="Prędkość"
+            image={VelocityImage}
+            level={userCar?.upgrades.velocity}
+            onClick={() => upgrade("velocity")}
+          />
+          <UpgradeButton
+            name="Waga"
+            image={MassImage}
+            level={userCar?.upgrades.mass}
+            onClick={() => upgrade("mass")}
+          />
+          <UpgradeButton
+            name="Tempomat"
+            image={TempomatImage}
+            level={userCar?.upgrades.tempo}
+            onClick={() => upgrade("tempo")}
+          />
         </div>
-        <Zegar speed={0} maxSpeed={5} />
-        <Pedal onClick={addMoneyOnClick} />
+        <Zegar speed={userCar?.speed} maxSpeed={100} />
+        <Pedal onClick={click} />
       </div>
     </main>
   );

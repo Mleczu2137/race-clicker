@@ -1,8 +1,8 @@
 export function Zegar({
-  speed,
+  speed = 0,
   maxSpeed,
 }: {
-  speed: number;
+  speed?: number;
   maxSpeed: number;
 }) {
   return (
