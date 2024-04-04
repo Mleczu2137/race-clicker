@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import "./App.css";
 import { Pedal } from "./components/Pedal";
 import { UpgradeButton } from "./components/UpgradeButton";
@@ -15,14 +16,24 @@ function FansDisplay({ fans }: { fans: number }) {
 
 function App() {
   const { status, cars, click, clicks, upgrade } = useWebsocket("hatfu");
+  const [money, setMoney] = useState(0);
 
   if (status === "connecting") {
     return <div>Connecting...</div>;
   }
 
+  const addMoneyOnClick = () => {
+    click()
+    setMoney(money + 1);
+  };
+
   return (
     <main>
       <div className="track">
+        <div>
+          {/* Track */}
+        </div>
+        <div></div>
         {cars.map((car, index) => (
           <div
             key={index}
@@ -38,7 +49,7 @@ function App() {
       <div className="panel">
         <div className="stats">
           <div>{clicks} clicks</div>
-          <MoneyDisplay money={0} />
+          <MoneyDisplay money={money} />
           <FansDisplay fans={0} />
         </div>
         <div className="upgrades">
@@ -52,7 +63,7 @@ function App() {
           <UpgradeButton name="Tempomat" onClick={(s) => upgrade(s)} />
         </div>
         <Zegar speed={0} maxSpeed={5} />
-        <Pedal onClick={click} />
+        <Pedal onClick={addMoneyOnClick} />
       </div>
     </main>
   );
