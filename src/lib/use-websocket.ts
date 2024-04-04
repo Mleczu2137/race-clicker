@@ -20,7 +20,6 @@ type Update = {
 export function useWebsocket(username: string) {
   const [cars, setCars] = useState<Car[]>([]);
   const [user, setUser] = useState<string | null>(null);
-  const [money, setMoney] = useState(0);
   const [clicks, setClicks] = useState(0);
 
   const conn = useRef<WebSocket | null>(null);
@@ -42,18 +41,6 @@ export function useWebsocket(username: string) {
       `ws://localhost:25555?username=${username}`
     );
     conn.current = websocket;
-
-    function update(newCars: Car[]) {
-      setCars((prevCars) =>
-        prevCars.map((car) => {
-          const index = newCars.findIndex((c) => c.username === car.username);
-          if (index !== -1) {
-            return newCars[index];
-          }
-          return car;
-        })
-      );
-    }
 
     function handshakeHandler(event: MessageEvent) {
       const handshake: Handshake = JSON.parse(event.data);
