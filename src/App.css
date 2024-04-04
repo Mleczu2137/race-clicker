@@ -113,21 +113,24 @@ main {
 
 .track {
   overflow-x: hidden;
-  height: 200px;
-  background-color: #1a1a1a;
+  height: 500px;
+  background-image:url(./assets/droga.png);
 }
 
 .track > div {
   height: 50%;
-  aspect-ratio: 1;
+  background: no-repeat;
 }
 
 .track > div:nth-child(1) {
-  background: red;
+  margin-top: 70px;
+  background-image: url(./assets/car1.png);
+  
+  
 }
 
 .track > div:nth-child(2) {
-  background: green;
+  background-image: url(./assets/car2.png);
 }
 
 .stats {

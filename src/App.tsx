@@ -28,6 +28,8 @@ function App() {
   return (
     <main>
       <div className="track">
+        <div></div>
+        <div></div>
         {cars.map((car, index) => (
           <div
             key={index}
