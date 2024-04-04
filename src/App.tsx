@@ -1,25 +1,20 @@
-import { useState } from "react";
-import { TRACK_LENGTH } from "./lib/util";
 import "./App.css";
 import { Pedal } from "./components/Pedal";
 import { UpgradeButton } from "./components/UpgradeButton";
 import { Zegar } from "./components/Zegar";
 import { useWebsocket } from "./lib/use-websocket";
+import { TRACK_LENGTH } from "../server/shared";
 
-function MoneyDisplay() {
-  const [money, setMoney] = useState(0);
-
+function MoneyDisplay({ money }: { money: number }) {
   return <div>${money}</div>;
 }
 
-function FansDisplay() {
-  const [fans, setFans] = useState(0);
-
+function FansDisplay({ fans }: { fans: number }) {
   return <div>{fans} fans</div>;
 }
 
 function App() {
-  const { status, cars, click, clicks } = useWebsocket();
+  const { status, cars, click, clicks, upgrade } = useWebsocket("hatfu");
 
   if (status === "connecting") {
     return <div>Connecting...</div>;
@@ -43,14 +38,18 @@ function App() {
       <div className="panel">
         <div className="stats">
           <div>{clicks} clicks</div>
-          <MoneyDisplay />
-          <FansDisplay />
+          <MoneyDisplay money={0} />
+          <FansDisplay fans={0} />
         </div>
         <div className="upgrades">
-          <UpgradeButton name="Aerodynamika" image="assets/aerodynamika.png" />
-          <UpgradeButton name="Prędkość" />
-          <UpgradeButton name="Waga" />
-          <UpgradeButton name="Tempomat" />
+          <UpgradeButton
+            name="Aerodynamika"
+            image="assets/aerodynamika.png"
+            onClick={(s) => upgrade(s)}
+          />
+          <UpgradeButton name="Prędkość" onClick={(s) => upgrade(s)} />
+          <UpgradeButton name="Waga" onClick={(s) => upgrade(s)} />
+          <UpgradeButton name="Tempomat" onClick={(s) => upgrade(s)} />
         </div>
         <Zegar speed={0} maxSpeed={5} />
         <Pedal onClick={click} />
