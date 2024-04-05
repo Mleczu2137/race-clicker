@@ -35,7 +35,6 @@ export function useWebsocket(username: string) {
     return cars[index];
   }, [cars, user]);
 
-
   useEffect(() => {
     const websocket = new WebSocket(
       `ws://localhost:25555?username=${username}`
@@ -54,22 +53,25 @@ export function useWebsocket(username: string) {
       const message: MessageOut = JSON.parse(event.data);
 
       if (message.type === "update") {
-        if (message.tick > tick.current) {
-          updates.current.push(message);
-        } else {
-          tick.current = message.tick;
-          setCars((prevCars) =>
-            prevCars.map((car) => {
-              const index = message.cars.findIndex(
-                (c) => c.username === car.username
-              );
-              if (index !== -1) {
-                return message.cars[index];
-              }
-              return car;
-            })
-          );
-        }
+        message.tick += 16;
+        console.log("update 16", message);
+        updates.current.push(message);
+
+        // if (message.tick > tick.current) {
+        //   updates.current.push(message);
+        // } else {
+        //   setCars((prevCars) =>
+        //     prevCars.map((car) => {
+        //       const index = message.cars.findIndex(
+        //         (c) => c.username === car.username
+        //       );
+        //       if (index !== -1) {
+        //         return message.cars[index];
+        //       }
+        //       return car;
+        //     })
+        //   );
+        // }
       } else if (message.type === "sync") {
         if (message.tick !== tick.current) {
           console.log(
@@ -92,16 +94,17 @@ export function useWebsocket(username: string) {
     websocket.onopen = () => setStatus("open");
     websocket.onclose = () => {
       setCars([]);
-      setUser(null)
-      setClicks(0)
+      setUser(null);
+      setClicks(0);
       setStatus("closed");
+      tick.current = 2;
     };
 
     return () => {
       websocket.close();
       conn.current = null;
     };
-  }, [setUser, setCars, username]);
+  }, [username]);
 
   useEffect(() => {
     if (status !== "open") return;
@@ -109,19 +112,27 @@ export function useWebsocket(username: string) {
     const interval = setInterval(() => {
       setCars((prev) => {
         const update = updates.current[0];
-        if (update && update.tick === tick.current) {
+
+        //let data = prev;
+        if (update && update.tick <= tick.current) {
           updates.current.shift();
-          prev.map((car) => {
-            const index = update.cars.findIndex(
-              (c) => c.username === car.username
-            );
-            if (index !== -1) {
-              return update.cars[index];
-            }
-            return car;
+          // data = prev.map((car) => {
+          //   const index = update.cars.findIndex(
+          //     (c) => c.username === car.username
+          //   );
+          //   if (index !== -1) {
+          //     return update.cars[index];
+          //   }
+          //   return car;
+          // });
+          console.log("działą", update.cars);
+          return update.cars.map((car) => {
+            console.log("działasz?");
+            return calculate(car);
           });
         }
-        return prev.map(calculate);
+
+        return prev.map((car) => calculate(car));
       });
 
       tick.current++;

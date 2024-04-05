@@ -129,8 +129,10 @@ setInterval(() => {
     calculate(car);
   });
 
-  const message: MessageOut = { type: "sync", tick: serverTick };
-  server.publish("cars", JSON.stringify(message));
+  if (serverTick % TICK_RATE === 0) {
+    const message: MessageOut = { type: "sync", tick: serverTick };
+    server.publish("cars", JSON.stringify(message));
+  }
 
   const carsToSend = cars.all().filter((car) => car.hasUpdated);
   if (carsToSend.length > 0) {
