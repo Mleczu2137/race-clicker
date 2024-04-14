@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   MessageOut,
   Car,
@@ -61,18 +61,21 @@ export function useWebsocket(username: string) {
     };
   }, [username]);
 
-  function click() {
+  const click = useCallback(() => {
     conn.current?.send(JSON.stringify({ type: "click" }));
     setClicks((prev) => prev + 1);
-  }
+  }, []);
 
-  function upgrade(upgrade: "aerodynamics" | "velocity" | "mass" | "tempo") {
-    const message: MessageIn = {
-      type: "upgrade",
-      name: upgrade,
-    };
-    conn.current?.send(JSON.stringify(message));
-  }
+  const upgrade = useCallback(
+    (upgrade: "aerodynamics" | "velocity" | "mass" | "tempo") => {
+      const message: MessageIn = {
+        type: "upgrade",
+        name: upgrade,
+      };
+      conn.current?.send(JSON.stringify(message));
+    },
+    []
+  );
 
   return { status, user, cars, click, clicks, upgrade };
 }
