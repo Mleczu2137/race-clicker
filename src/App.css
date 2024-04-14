@@ -23,9 +23,14 @@ main {
   aspect-ratio: 1 / 1;
   border-radius: 12px;
   border: 2px solid darkturquoise;
+  background-color: aqua;
 
   transition: all 0.1s;
   box-shadow: 0 4px 0px 0px rgb(0 0 0 / 0.5);
+}
+
+.button:disabled {
+  background-color: grey;
 }
 
 .button > .name {
@@ -35,7 +40,7 @@ main {
   color: black;
 }
 
-.button:active {
+.button:enabled:active {
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   transform: translateY(4px);
 }
@@ -46,7 +51,7 @@ main {
   color: rgb(53, 53, 53)
 }
 
-.button.Tempomat {
+/* .button.Tempomat {
   background-color: aqua;
 }
 
@@ -60,7 +65,7 @@ main {
 
 .button.Aerodynamika {
   background-color: aqua;
-}
+} */
 
 .upgrades {
   display: grid;
@@ -78,6 +83,7 @@ main {
   border-radius: 9999px;
   width: 256px;
   height: 256px;
+  /* border: 2px solid darkturquoise; */
 }
 
 .zegar > div {
@@ -95,6 +101,7 @@ main {
   aspect-ratio: 321/838;
   background-image: url(./assets/pedal.webp);
   background-size: contain;
+  transition: transform 0.05s;
 }
 
 .pedal:active {
@@ -103,6 +110,7 @@ main {
 }
 
 .panel {
+  /* background-color: #1a1a1a; */
   display: flex;
   flex-direction: row;
   gap: 32px;
@@ -118,12 +126,12 @@ main {
   height: 500px;
   background-image: url(./assets/droga.png);
   background-position-x: 76px;
-  padding-top: 50px;
-  padding-bottom: 50px;
+  padding-top: 90px;
+  padding-bottom: 90px;
 
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
   gap: 21px
 }
@@ -132,6 +140,10 @@ main {
   height: 100px;
   width: 202px;
   color: white;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .track > div:nth-child(1) {
@@ -198,4 +210,21 @@ form > button {
   outline: none;
   border: 1px rgb(0,0,0, 0.2) solid;
   padding: 4px 8px 4px 8px;
+}
+
+table {
+  border-collapse: collapse;
+  color: white;
+  background: #1a1a1a;
+  font-size: 18px;
+}
+
+th {
+  background: #333;
+  padding: 4px;
+}
+
+td {
+  border: 1px solid #333;
+  padding: 8px;
 }

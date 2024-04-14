@@ -21,7 +21,7 @@ export default function Game(props: { username: string }) {
   }
 
   return (
-    <main>
+    <>
       <div className="track">
         {cars.map((car) => (
           <div
@@ -42,10 +42,30 @@ export default function Game(props: { username: string }) {
       </div>
 
       <div className="panel">
-        <div className="stats">
-          <div>{clicks} clicks</div>
-          <div>${user?.money}</div>
-          <div>{0} fans</div>
+        <div style={{ display: "flex", gap: 16, alignItems: "end" }}>
+          <table>
+            <thead>
+              <tr>
+                <th>Nazwa gracza</th>
+                <th>Okrążenia</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cars
+                .toSorted((a, b) => b.lap - a.lap || b.position - a.position)
+                .map((car) => (
+                  <tr key={car.username}>
+                    <td>{car.username}</td>
+                    <td>{car.lap}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+          <div className="stats">
+            <div>{clicks} clicks</div>
+            <div>${user?.money.toFixed(2)}</div>
+            <div>{0} fans</div>
+          </div>
         </div>
         <div className="upgrades">
           <UpgradeButton
@@ -53,29 +73,34 @@ export default function Game(props: { username: string }) {
             image={AerodynamicImage}
             level={user?.upgrades.aerodynamics}
             onClick={() => upgrade("aerodynamics")}
+            money={user?.money}
           />
           <UpgradeButton
             name="Prędkość"
             image={VelocityImage}
             level={user?.upgrades.velocity}
             onClick={() => upgrade("velocity")}
+            money={user?.money}
           />
           <UpgradeButton
             name="Waga"
             image={MassImage}
             level={user?.upgrades.mass}
             onClick={() => upgrade("mass")}
+            money={user?.money}
           />
           <UpgradeButton
             name="Tempomat"
             image={TempomatImage}
             level={user?.upgrades.tempo}
             onClick={() => upgrade("tempo")}
+            money={user?.money}
+
           />
         </div>
-        <Zegar speed={0} maxSpeed={100} />
+        <Zegar speed={user.speed} maxSpeed={100} />
         <Pedal onClick={click} />
       </div>
-    </main>
+    </>
   );
 }
