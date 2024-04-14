@@ -3,14 +3,20 @@ export type MessageIn =
   | { type: "upgrade"; name: "aerodynamics" | "velocity" | "mass" | "tempo" };
 
 export type MessageOut =
-  | { type: "update"; tick: number; cars: Car[] }
+  | { type: "update"; tick: number; cars: CarClient[] }
   | { type: "sync"; tick: number }
-  | { type: "remove"; username: string };
+  | { type: "remove"; username: string }
+  | { type: "user" } & Partial<User>;
 
 export type Handshake = {
-  user: string;
   tick: number;
-  cars: Car[];
+  user: User;
+  cars: CarClient[];
+};
+
+export type User = {
+  money: number;
+  upgrades: Upgrades;
 };
 
 export type Upgrades = {
@@ -23,7 +29,6 @@ export type Upgrades = {
 export type Car = {
   username: string;
 
-  hasUpdated: boolean;
   clicks: number;
   money: number;
 
@@ -37,16 +42,12 @@ export type Car = {
 
 export type CarClient = {
   username: string;
-  money: number;
-  upgrades: Upgrades;
-  speed: number;
-  acceleration: number;
   position: number;
   lap: number;
 };
 
 export const TRACK_LENGTH = 1000; //meters
-export const TICK_RATE = 200/3;
+export const TICK_RATE = 200 / 3;
 const DRAG_COEFFICIENT = 0.1;
 const GRAVITY = 0.05;
 const MASS = 1;

@@ -112,21 +112,30 @@ main {
 }
 
 .track {
+  box-sizing: border-box;
   overflow-x: hidden;
+
   height: 500px;
-  background-image:url(./assets/droga.png);
+  background-image: url(./assets/droga.png);
+  background-position-x: 76px;
+  padding-top: 50px;
+  padding-bottom: 50px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  gap: 21px
 }
 
 .track > div {
-  height: 50%;
-  background: no-repeat;
+  height: 100px;
+  width: 202px;
+  color: white;
 }
 
 .track > div:nth-child(1) {
-  margin-top: 70px;
   background-image: url(./assets/car1.png);
-  
-  
 }
 
 .track > div:nth-child(2) {

@@ -60,7 +60,6 @@ const server = Bun.serve<Car>({
         upgrades: { aerodynamics: 0, velocity: 0, mass: 0, tempo: 0 },
         clicks: 0,
         money: 0,
-        hasUpdated: true,
       },
     });
   },
@@ -70,7 +69,10 @@ const server = Bun.serve<Car>({
       cars.add(ws.data);
 
       const handshake: Handshake = {
-        user: ws.data.username,
+        user: {
+          money: ws.data.money,
+          upgrades: ws.data.upgrades,
+        },
         tick: serverTick,
         cars: cars.all(),
       };
@@ -86,8 +88,6 @@ const server = Bun.serve<Car>({
           "velocity",
           "mass",
           "tempo",
-          "speed",
-          "acceleration",
           "position",
           "lap",
           "money",
@@ -99,17 +99,24 @@ const server = Bun.serve<Car>({
       const data: MessageIn = JSON.parse(message.toString());
 
       if (data.type === "click") {
-        ws.data.hasUpdated = true;
         ws.data.clicks++;
       } else if (data.type === "upgrade") {
         const upgrade = data.name;
         const price = 0; //getPrice(ws.data.upgrades[upgrade]);
-        if (ws.data.money >= price) {
-          ws.data.hasUpdated = true;
-
-          ws.data.money -= price;
-          ws.data.upgrades[upgrade]++;
+        if (ws.data.money < price) {
+          return;
         }
+
+        ws.data.money -= price;
+        ws.data.upgrades[upgrade]++;
+
+        const message: MessageOut = {
+          type: "user",
+          money: ws.data.money,
+          upgrades: ws.data.upgrades,
+        };
+
+        ws.send(JSON.stringify(message));
       }
     },
     close(ws) {
@@ -124,14 +131,7 @@ const server = Bun.serve<Car>({
   },
 });
 
-let time = performance.now();
 setInterval(() => {
-  const elapsed = performance.now() - time;
-  if (elapsed > 15.65 || elapsed < 15.6) {
-    console.log(elapsed);
-  }
-  time = performance.now();
-
   cars.all().forEach((car) => {
     calculate(car);
   });
@@ -141,38 +141,23 @@ setInterval(() => {
     server.publish("cars", JSON.stringify(message));
   }
 
-  const carsToSend = cars.all().filter((car) => car.hasUpdated);
-  if (carsToSend.length > 0) {
-    const message: MessageOut = {
-      type: "update",
-      tick: serverTick,
-      cars: carsToSend,
-    };
+  const message: MessageOut = {
+    type: "update",
+    tick: serverTick,
+    cars: cars.all(),
+  };
 
-    server.publish(
+  server.publish(
+    "cars",
+    JSON.stringify(message, [
+      "type",
+      "tick",
       "cars",
-      JSON.stringify(message, [
-        "type",
-        "tick",
-        "cars",
-        "username",
-        "upgrades",
-        "aerodynamics",
-        "velocity",
-        "mass",
-        "tempo",
-        "speed",
-        "acceleration",
-        "position",
-        "lap",
-        "money",
-      ])
-    );
-  }
-
-  cars.all().forEach((car) => {
-    car.hasUpdated = false;
-  });
+      "username",
+      "position",
+      "lap",
+    ])
+  );
 
   serverTick++;
 }, 1000 / TICK_RATE);

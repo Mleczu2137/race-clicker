@@ -1,39 +1,24 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   MessageOut,
   Car,
   Handshake,
   MessageIn,
-  calculate,
-  TICK_RATE,
+  User,
+  CarClient,
 } from "../../server/shared";
 
 export type { Car };
 
 type ConnectionStatus = "connecting" | "open" | "closed";
 
-type Update = {
-  tick: number;
-  cars: Car[];
-};
-
 export function useWebsocket(username: string) {
-  const [cars, setCars] = useState<Car[]>([]);
-  const [user, setUser] = useState<string | null>(null);
+  const [user, setUser] = useState<User>({} as any);
+  const [cars, setCars] = useState<CarClient[]>([]);
   const [clicks, setClicks] = useState(0);
 
   const conn = useRef<WebSocket | null>(null);
   const [status, setStatus] = useState<ConnectionStatus>("connecting");
-  const tick = useRef(2);
-  const updates = useRef<Update[]>([]);
-
-  const userCar = useMemo(() => {
-    const index = cars.findIndex((c) => c.username == user);
-    if (index === -1) {
-      return null;
-    }
-    return cars[index];
-  }, [cars, user]);
 
   useEffect(() => {
     const websocket = new WebSocket(
@@ -43,44 +28,31 @@ export function useWebsocket(username: string) {
 
     function handshakeHandler(event: MessageEvent) {
       const handshake: Handshake = JSON.parse(event.data);
+      websocket.onmessage = messageHandler;
       setUser(handshake.user);
       setCars(handshake.cars);
-      tick.current = handshake.tick;
-      websocket.onmessage = messageHandler;
+      setStatus("open");
     }
 
     function messageHandler(event: MessageEvent) {
       const message: MessageOut = JSON.parse(event.data);
 
       if (message.type === "update") {
-        message.tick += 2;
-        updates.current.push(message);
-      } else if (message.type === "sync") {
-        if (message.tick !== tick.current) {
-          console.log(
-            "dropped",
-            "server",
-            message.tick,
-            "client",
-            tick.current
-          );
-          //tick.current = message.tick;
-        }
+        setCars(message.cars);
       } else if (message.type === "remove") {
         setCars((prevCars) =>
           prevCars.filter((car) => car.username !== message.username)
         );
+      } else if (message.type === "user") {
+        setUser((prev) => ({ ...prev, ...message }));
       }
     }
 
     websocket.onmessage = handshakeHandler;
-    websocket.onopen = () => setStatus("open");
     websocket.onclose = () => {
       setCars([]);
-      setUser(null);
       setClicks(0);
       setStatus("closed");
-      tick.current = 2;
     };
 
     return () => {
@@ -88,45 +60,6 @@ export function useWebsocket(username: string) {
       conn.current = null;
     };
   }, [username]);
-
-  useEffect(() => {
-    if (status !== "open") return;
-
-    let time = performance.now();
-
-    const interval = setInterval(() => {
-      const elapsed = performance.now() - time;
-      if (elapsed > 15.65 || elapsed < 15.6) {
-        console.log(elapsed);
-      }
-      time = performance.now();
-
-      setCars((prev) => prev.map((car) => calculate(car)));
-
-      const update = updates.current[0];
-
-      if (update && update.tick <= tick.current) {
-        updates.current.shift();
-
-        setCars((prev) => {
-          return prev.map((car) => {
-            const index = update.cars.findIndex(
-              (c) => c.username === car.username
-            );
-
-            if (index !== -1) {
-              return update.cars[index];
-            }
-            return car;
-          });
-        });
-      }
-
-      tick.current++;
-    }, 1000 / TICK_RATE );
-
-    return () => clearInterval(interval);
-  }, [status]);
 
   function click() {
     conn.current?.send(JSON.stringify({ type: "click" }));
@@ -141,5 +74,5 @@ export function useWebsocket(username: string) {
     conn.current?.send(JSON.stringify(message));
   }
 
-  return { status, user, userCar, cars, click, clicks, upgrade };
+  return { status, user, cars, click, clicks, upgrade };
 }

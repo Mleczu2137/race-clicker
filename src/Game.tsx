@@ -10,7 +10,7 @@ import MassImage from "./assets/waga.svg";
 import TempomatImage from "./assets/tempomat_icon.svg";
 
 export default function Game(props: { username: string }) {
-  const { status, userCar, cars, click, clicks, upgrade } = useWebsocket(
+  const { status, user, cars, click, clicks, upgrade } = useWebsocket(
     props.username
   );
 
@@ -28,46 +28,52 @@ export default function Game(props: { username: string }) {
             key={car.username}
             style={{
               transform: `translateX(${
-                (car.position / TRACK_LENGTH) * window.innerWidth
+                ((car.position >= TRACK_LENGTH / 2
+                  ? car.position - TRACK_LENGTH
+                  : car.position) /
+                  TRACK_LENGTH) *
+                (window.innerWidth + 202)
               }px)`,
             }}
-          />
+          >
+            <h2>{car.username}</h2>
+          </div>
         ))}
       </div>
 
       <div className="panel">
         <div className="stats">
           <div>{clicks} clicks</div>
-          <div>${userCar?.money}</div>
+          <div>${user?.money}</div>
           <div>{0} fans</div>
         </div>
         <div className="upgrades">
           <UpgradeButton
             name="Aerodynamika"
             image={AerodynamicImage}
-            level={userCar?.upgrades.aerodynamics}
+            level={user?.upgrades.aerodynamics}
             onClick={() => upgrade("aerodynamics")}
           />
           <UpgradeButton
             name="Prędkość"
             image={VelocityImage}
-            level={userCar?.upgrades.velocity}
+            level={user?.upgrades.velocity}
             onClick={() => upgrade("velocity")}
           />
           <UpgradeButton
             name="Waga"
             image={MassImage}
-            level={userCar?.upgrades.mass}
+            level={user?.upgrades.mass}
             onClick={() => upgrade("mass")}
           />
           <UpgradeButton
             name="Tempomat"
             image={TempomatImage}
-            level={userCar?.upgrades.tempo}
+            level={user?.upgrades.tempo}
             onClick={() => upgrade("tempo")}
           />
         </div>
-        <Zegar speed={userCar?.speed} maxSpeed={100} />
+        <Zegar speed={0} maxSpeed={100} />
         <Pedal onClick={click} />
       </div>
     </main>
