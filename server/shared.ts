@@ -1,22 +1,25 @@
+import { ServerWebSocket } from "bun";
+
 export type MessageIn =
   | { type: "click" }
   | { type: "upgrade"; name: "aerodynamics" | "velocity" | "mass" | "tempo" };
 
 export type MessageOut =
-  | { type: "update"; tick: number; cars: CarClient[] }
-  | { type: "sync"; tick: number }
+  | { type: "update"; cars: CarClient[] }
   | { type: "remove"; username: string }
-  | { type: "user" } & Partial<User>;
+  | ({ type: "user" } & Partial<User>);
 
 export type Handshake = {
-  tick: number;
   user: User;
   cars: CarClient[];
 };
 
 export type User = {
   money: number;
+  fans: number;
   upgrades: Upgrades;
+  speed: number;
+  ws: ServerWebSocket<Car>;
 };
 
 export type Upgrades = {
@@ -28,58 +31,23 @@ export type Upgrades = {
 
 export type Car = {
   username: string;
-
   clicks: number;
-  money: number;
-
-  upgrades: Upgrades;
 
   speed: number;
   acceleration: number;
   position: number;
   lap: number;
-};
+} & User;
 
 export type CarClient = {
   username: string;
+  speed: number;
   position: number;
   lap: number;
 };
 
 export const TRACK_LENGTH = 1000; //meters
-export const TICK_RATE = 200 / 3;
-const DRAG_COEFFICIENT = 0.1;
-const GRAVITY = 0.05;
-const MASS = 1;
-
-export function calculate(car: Car): Car {
-  const dragCoefficient = DRAG_COEFFICIENT - car.upgrades.aerodynamics * 0.0001;
-  const speedMultiplier = 1 + car.upgrades.velocity;
-  const mass = MASS - car.upgrades.mass * 0.001;
-  const tempo = car.upgrades.tempo * 0.1;
-
-  car.acceleration = tempo;
-  if (car.clicks !== undefined) {
-    car.acceleration += car.clicks * speedMultiplier;
-    car.clicks = 0;
-  }
-  car.acceleration /= mass;
-
-  const drag = (car.speed ** 2 * dragCoefficient) / mass;
-  car.acceleration -= drag;
-  // gravity
-  car.acceleration -= GRAVITY / TICK_RATE;
-
-  car.speed = Math.max(0, car.speed + car.acceleration);
-  car.position += car.speed;
-
-  car.lap += Math.floor(car.position / TRACK_LENGTH);
-  car.position %= TRACK_LENGTH;
-
-  car.acceleration = 0;
-
-  return car;
-}
+export const TICK_RATE = 64;
 
 export function getPrice(level: number): number {
   if (level === 0) {

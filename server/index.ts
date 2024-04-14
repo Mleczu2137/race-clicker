@@ -4,7 +4,7 @@ import {
   MessageIn,
   MessageOut,
   TICK_RATE,
-  calculate,
+  TRACK_LENGTH,
   getPrice,
 } from "./shared";
 
@@ -60,20 +60,19 @@ const server = Bun.serve<Car>({
         upgrades: { aerodynamics: 0, velocity: 0, mass: 0, tempo: 0 },
         clicks: 0,
         money: 0,
+        fans: 0,
+        ws: null,
       },
     });
   },
   websocket: {
     open(ws) {
       console.log(`Player ${ws.data.username} connected to server`);
+      ws.data.ws = ws;
       cars.add(ws.data);
 
       const handshake: Handshake = {
-        user: {
-          money: ws.data.money,
-          upgrades: ws.data.upgrades,
-        },
-        tick: serverTick,
+        user: ws.data,
         cars: cars.all(),
       };
 
@@ -102,7 +101,7 @@ const server = Bun.serve<Car>({
         ws.data.clicks++;
       } else if (data.type === "upgrade") {
         const upgrade = data.name;
-        const price = 0; //getPrice(ws.data.upgrades[upgrade]);
+        const price = getPrice(ws.data.upgrades[upgrade]);
         if (ws.data.money < price) {
           return;
         }
@@ -136,28 +135,62 @@ setInterval(() => {
     calculate(car);
   });
 
-  if (serverTick % TICK_RATE === 0) {
-    const message: MessageOut = { type: "sync", tick: serverTick };
-    server.publish("cars", JSON.stringify(message));
-  }
-
   const message: MessageOut = {
     type: "update",
-    tick: serverTick,
     cars: cars.all(),
   };
 
   server.publish(
     "cars",
-    JSON.stringify(message, [
-      "type",
-      "tick",
-      "cars",
-      "username",
-      "position",
-      "lap",
-    ])
+    JSON.stringify(message, ["type", "cars", "username", "position", "lap"])
   );
 
   serverTick++;
 }, 1000 / TICK_RATE);
+
+const DRAG_COEFFICIENT = 0.1;
+const GRAVITY = 0.05;
+const MASS = 1;
+
+function calculate(car: Car): Car {
+  const dragCoefficient = DRAG_COEFFICIENT - car.upgrades.aerodynamics * 0.001;
+  const speedMultiplier = 1 + car.upgrades.velocity;
+  const mass = MASS - car.upgrades.mass * 0.001;
+  const tempo = car.upgrades.tempo * 0.1;
+
+  car.acceleration = tempo;
+  if (car.clicks !== undefined) {
+    car.acceleration += car.clicks * speedMultiplier;
+    car.clicks = 0;
+  }
+  car.acceleration /= mass;
+
+  const drag = (car.speed ** 2 * dragCoefficient) / mass;
+  car.acceleration -= drag;
+  // gravity
+  car.acceleration -= GRAVITY / TICK_RATE;
+
+  car.speed = Math.max(0, car.speed + car.acceleration);
+  car.position += car.speed;
+
+  const lap_completed = Math.floor(car.position / TRACK_LENGTH);
+
+  const message: MessageOut = {
+    type: "user",
+    speed: car.speed,
+  };
+
+  if (lap_completed > 0) {
+    car.position %= TRACK_LENGTH;
+    car.money += lap_completed + car.fans;
+    car.lap += lap_completed;
+
+    message.money = car.money;
+  }
+
+  car.ws.send(JSON.stringify(message));
+
+  car.acceleration = 0;
+
+  return car;
+}
