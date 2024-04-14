@@ -124,7 +124,14 @@ const server = Bun.serve<Car>({
   },
 });
 
+let time = performance.now();
 setInterval(() => {
+  const elapsed = performance.now() - time;
+  if (elapsed > 15.65 || elapsed < 15.6) {
+    console.log(elapsed);
+  }
+  time = performance.now();
+
   cars.all().forEach((car) => {
     calculate(car);
   });

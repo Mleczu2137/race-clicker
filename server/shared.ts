@@ -46,7 +46,7 @@ export type CarClient = {
 };
 
 export const TRACK_LENGTH = 1000; //meters
-export const TICK_RATE = 64;
+export const TICK_RATE = 200/3;
 const DRAG_COEFFICIENT = 0.1;
 const GRAVITY = 0.05;
 const MASS = 1;

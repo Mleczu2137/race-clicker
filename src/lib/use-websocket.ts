@@ -53,25 +53,8 @@ export function useWebsocket(username: string) {
       const message: MessageOut = JSON.parse(event.data);
 
       if (message.type === "update") {
-        message.tick += 16;
-        console.log("update 16", message);
+        message.tick += 2;
         updates.current.push(message);
-
-        // if (message.tick > tick.current) {
-        //   updates.current.push(message);
-        // } else {
-        //   setCars((prevCars) =>
-        //     prevCars.map((car) => {
-        //       const index = message.cars.findIndex(
-        //         (c) => c.username === car.username
-        //       );
-        //       if (index !== -1) {
-        //         return message.cars[index];
-        //       }
-        //       return car;
-        //     })
-        //   );
-        // }
       } else if (message.type === "sync") {
         if (message.tick !== tick.current) {
           console.log(
@@ -81,7 +64,7 @@ export function useWebsocket(username: string) {
             "client",
             tick.current
           );
-          tick.current = message.tick;
+          //tick.current = message.tick;
         }
       } else if (message.type === "remove") {
         setCars((prevCars) =>
@@ -109,34 +92,38 @@ export function useWebsocket(username: string) {
   useEffect(() => {
     if (status !== "open") return;
 
+    let time = performance.now();
+
     const interval = setInterval(() => {
-      setCars((prev) => {
-        const update = updates.current[0];
+      const elapsed = performance.now() - time;
+      if (elapsed > 15.65 || elapsed < 15.6) {
+        console.log(elapsed);
+      }
+      time = performance.now();
 
-        //let data = prev;
-        if (update && update.tick <= tick.current) {
-          updates.current.shift();
-          // data = prev.map((car) => {
-          //   const index = update.cars.findIndex(
-          //     (c) => c.username === car.username
-          //   );
-          //   if (index !== -1) {
-          //     return update.cars[index];
-          //   }
-          //   return car;
-          // });
-          console.log("działą", update.cars);
-          return update.cars.map((car) => {
-            console.log("działasz?");
-            return calculate(car);
+      setCars((prev) => prev.map((car) => calculate(car)));
+
+      const update = updates.current[0];
+
+      if (update && update.tick <= tick.current) {
+        updates.current.shift();
+
+        setCars((prev) => {
+          return prev.map((car) => {
+            const index = update.cars.findIndex(
+              (c) => c.username === car.username
+            );
+
+            if (index !== -1) {
+              return update.cars[index];
+            }
+            return car;
           });
-        }
-
-        return prev.map((car) => calculate(car));
-      });
+        });
+      }
 
       tick.current++;
-    }, 1000 / TICK_RATE);
+    }, 1000 / TICK_RATE );
 
     return () => clearInterval(interval);
   }, [status]);

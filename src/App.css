@@ -147,8 +147,46 @@ main {
   text-decoration: none;
   display: inline-block;
   font-size: 16px;
-  cursor: pointer;
   border-radius: 8px;
   padding: 10px 24px;
   white-space: nowrap;
+}
+
+.login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+form {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+  max-width: fit-content;
+  border: 1px rgb(0,0,0, 0.4) solid;
+}
+
+form > h1 {
+  margin-top: 0px;
+  margin-bottom: 8px;
+}
+
+form input {
+  border-radius: 4px;
+  outline: none;
+  border: 1px rgb(0,0,0, 0.2) solid;
+}
+
+form > button {
+  border-radius: 12px;
+  font-size: 16px;
+  outline: none;
+  border: 1px rgb(0,0,0, 0.2) solid;
+  padding: 4px 8px 4px 8px;
 }
