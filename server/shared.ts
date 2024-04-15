@@ -6,7 +6,6 @@ export type MessageIn =
 
 export type MessageOut =
   | { type: "update"; cars: CarClient[] }
-  | { type: "remove"; username: string }
   | ({ type: "user" } & Partial<User>);
 
 export type Handshake = {

@@ -49,6 +49,9 @@ const server = Bun.serve<Car>({
     if (!username) {
       return new Response("Username is required", { status: 400 });
     }
+    if (cars.all().find((car) => car.username === username)) {
+      return new Response("Username is already taken", { status: 400 });
+    }
 
     server.upgrade(req, {
       data: {
@@ -121,11 +124,6 @@ const server = Bun.serve<Car>({
     close(ws) {
       console.log(`Player ${ws.data.username} disconnected from the server`);
       cars.remove(ws.data.username);
-      const message: MessageOut = {
-        type: "remove",
-        username: ws.data.username,
-      };
-      ws.publish("cars", JSON.stringify(message));
     },
   },
 });

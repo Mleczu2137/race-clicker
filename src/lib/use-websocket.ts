@@ -1,14 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   MessageOut,
-  Car,
   Handshake,
   MessageIn,
   User,
   CarClient,
 } from "../../server/shared";
-
-export type { Car };
 
 type ConnectionStatus = "connecting" | "open" | "closed";
 
@@ -39,10 +36,6 @@ export function useWebsocket(username: string) {
 
       if (message.type === "update") {
         setCars(message.cars);
-      } else if (message.type === "remove") {
-        setCars((prevCars) =>
-          prevCars.filter((car) => car.username !== message.username)
-        );
       } else if (message.type === "user") {
         setUser((prev) => ({ ...prev, ...message }));
       }
