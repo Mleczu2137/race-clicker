@@ -4,7 +4,7 @@
 ```
 bun start
 ```
-Albo tak, jeśli potrzebujemy innego serwera (default: `ws://localhost:25555"`)
+Albo tak, jeśli potrzebujemy innego serwera (default: `ws://localhost:25555`)
 ```
 VITE_IP_ADDRESS="ws://192.168.0.2:25555" bun start
 ```
