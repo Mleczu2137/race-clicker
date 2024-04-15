@@ -9,6 +9,8 @@ import {
 
 type ConnectionStatus = "connecting" | "open" | "closed";
 
+const address = process.env.IP_ADDRESS
+
 export function useWebsocket(username: string) {
   const [user, setUser] = useState<User>({} as any);
   const [cars, setCars] = useState<CarClient[]>([]);
@@ -19,7 +21,7 @@ export function useWebsocket(username: string) {
 
   useEffect(() => {
     const websocket = new WebSocket(
-      `ws://localhost:25555?username=${username}`
+      `${address}?username=${username}`
     );
     conn.current = websocket;
 

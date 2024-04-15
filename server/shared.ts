@@ -1,5 +1,3 @@
-import { ServerWebSocket } from "bun";
-
 export type MessageIn =
   | { type: "click" }
   | { type: "upgrade"; name: "aerodynamics" | "velocity" | "mass" | "tempo" };
@@ -18,7 +16,7 @@ export type User = {
   fans: number;
   upgrades: Upgrades;
   speed: number;
-  ws: ServerWebSocket<Car>;
+  ws: any;
 };
 
 export type Upgrades = {
